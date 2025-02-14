@@ -8,7 +8,6 @@ import com.lhindInternship.surveyApp.repository.SurveyRepository;
 import com.lhindInternship.surveyApp.utils.SurveyValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
@@ -29,13 +28,15 @@ public class SurveyService {
                 throw new IllegalArgumentException("Survey must have between 10 and 40 questions.");
             }
 
+            SurveyValidator.validateSurveyFields(survey);
+
             for (Question question : survey.getQuestions()) {
                 question.setSurvey(survey);
             }
 
             return surveyRepository.save(survey);
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException(e.getMessage());
+            throw new IllegalArgumentException("Validation Error: " + e.getMessage());
         } catch (Exception e) {
             throw new RuntimeException("An unexpected error occurred while saving the survey.");
         }
@@ -58,6 +59,8 @@ public class SurveyService {
                     throw new IllegalArgumentException("Survey must have between 10 and 40 questions.");
                 }
 
+                SurveyValidator.validateSurveyFields(updatedSurvey);
+
                 existingSurvey.setTitle(updatedSurvey.getTitle());
                 existingSurvey.setDescription(updatedSurvey.getDescription());
 
@@ -70,7 +73,7 @@ public class SurveyService {
                 return surveyRepository.save(existingSurvey);
             }).orElseThrow(() -> new RuntimeException("Survey not found"));
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException(e.getMessage());
+            throw new IllegalArgumentException("Validation Error: " + e.getMessage());
         } catch (Exception e) {
             throw new RuntimeException("An unexpected error occurred while updating the survey.");
         }
